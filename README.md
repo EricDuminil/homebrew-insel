@@ -9,8 +9,13 @@ Only Apple Silicon (arm64) macOS is supported.
 
 ```
 brew tap ericduminil/insel
+brew trust --cask ericduminil/insel/insel
 brew install --cask insel
 ```
+
+Homebrew requires explicit trust for any non-official tap (since Homebrew
+6.0), so the `brew trust` step is required the first time — otherwise
+`brew install` refuses to load the cask.
 
 `INSEL.app` is only ad-hoc signed, not notarized by Apple. It installs and
 launches without a Gatekeeper prompt when installed via this cask, but if
