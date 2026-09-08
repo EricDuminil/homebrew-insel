@@ -1,8 +1,7 @@
 # homebrew-insel
 
 Homebrew tap for [INSEL](https://insel.eu/), a simulation environment for
-energy systems (engine, tools, and GUI), developed at the Center for
-Sustainable Energy Technology, HFT Stuttgart.
+energy systems (engine, tools, and GUI), developed HfT Stuttgart.
 
 Only Apple Silicon (arm64) macOS is supported.
 
