@@ -1,7 +1,7 @@
 # homebrew-insel
 
 Homebrew tap for [INSEL](https://insel.eu/), a simulation environment for
-energy systems (engine, tools, and GUI), developed HfT Stuttgart.
+energy systems (engine, tools, and GUI), developed at HfT Stuttgart.
 
 Only Apple Silicon (arm64) macOS is supported.
 
@@ -12,9 +12,11 @@ brew tap ericduminil/insel
 brew install --cask insel
 ```
 
-INSEL is not notarized or signed by Apple. On first launch of `INSEL.app`
-you may need to right-click it in Finder and choose "Open", or allow it
-under System Settings → Privacy & Security.
+`INSEL.app` is only ad-hoc signed, not notarized by Apple. It installs and
+launches without a Gatekeeper prompt when installed via this cask, but if
+macOS ever blocks it (e.g. after manually moving/re-downloading the app),
+right-click it in Finder and choose "Open", or allow it under
+System Settings → Privacy & Security.
 
 ## Uninstall
 
