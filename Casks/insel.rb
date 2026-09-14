@@ -1,6 +1,6 @@
 cask "insel" do
   version "8.3.4.0b"
-  sha256 "e8d95427ea0f9b96f7e62d740b4f19474a4814727f885b8049380f42aec0859e"
+  sha256 "6b99f9db3c8b2f09fff4288108e48787b3b3f5b7c4a846d39da98f3c088eee97"
 
   url "https://insel.eu/download/insel_#{version}_arm64_full.pkg"
   name "INSEL"
