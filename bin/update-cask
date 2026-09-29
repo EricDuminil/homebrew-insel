@@ -1,0 +1,75 @@
+#!/bin/bash
+# Bump Casks/insel.rb to whatever version is currently published on insel.eu.
+#
+# Usage: bin/update-cask
+#
+# Fetches the insel.eu download page, extracts the current macOS full-pkg
+# version, and if it differs from what's declared in Casks/insel.rb,
+# downloads that pkg, computes its sha256, edits the cask, and commits the
+# change locally. Never pushes -- review with `git show` and push yourself.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CASK_FILE="$REPO_ROOT/Casks/insel.rb"
+DOWNLOAD_PAGE="https://insel.eu/download/"
+
+current_version=$(grep -oE 'version "[^"]+"' "$CASK_FILE" | head -1 | cut -d'"' -f2)
+
+filename=$(curl -fsSL "$DOWNLOAD_PAGE" |
+	grep -oE 'insel_[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[a-z]?_arm64_full\.pkg' |
+	head -1)
+
+if [[ -z "$filename" ]]; then
+	echo "Could not find a macOS full-pkg filename on $DOWNLOAD_PAGE" >&2
+	exit 1
+fi
+
+new_version=$(sed -E 's/^insel_(.+)_arm64_full\.pkg$/\1/' <<<"$filename")
+
+if [[ "$new_version" == "$current_version" ]]; then
+	echo "Already up to date ($current_version)."
+	exit 0
+fi
+
+echo "New version found: $current_version -> $new_version"
+
+pkg_url="https://insel.eu/download/insel_${new_version}_arm64_full.pkg"
+tmp_pkg=$(mktemp -t "insel_${new_version}_arm64_full.XXXXXX.pkg")
+trap 'rm -f "$tmp_pkg"' EXIT
+
+echo "Downloading $pkg_url ..."
+curl -fsSL "$pkg_url" -o "$tmp_pkg"
+new_sha256=$(shasum -a 256 "$tmp_pkg" | cut -d' ' -f1)
+
+echo "New sha256: $new_sha256"
+
+sed -i '' -E \
+	-e "s/version \"[^\"]+\"/version \"${new_version}\"/" \
+	-e "s/sha256 \"[^\"]+\"/sha256 \"${new_sha256}\"/" \
+	"$CASK_FILE"
+
+# brew style/audit require the file to live inside an actual tap directory
+# (e.g. /opt/homebrew/Library/Taps/...), which this git checkout isn't -- so
+# a plain Ruby syntax check is what actually applies here. This script only
+# ever replaces the version/sha256 string values, never stanza structure, so
+# that's sufficient to catch a broken substitution.
+if command -v ruby >/dev/null 2>&1; then
+	if ! ruby -c "$CASK_FILE" >/dev/null; then
+		echo "$CASK_FILE has a syntax error after the update -- not committing." >&2
+		exit 1
+	fi
+else
+	echo "ruby not found on PATH -- skipping syntax check." >&2
+fi
+
+if [[ ! "$new_sha256" =~ ^[0-9a-f]{64}$ ]]; then
+	echo "Computed sha256 doesn't look like a valid sha256: $new_sha256" >&2
+	exit 1
+fi
+
+cd "$REPO_ROOT"
+git add Casks/insel.rb
+git commit -m "Bump insel cask to ${new_version}"
+
+echo "Committed. Review with 'git show' and push when ready."

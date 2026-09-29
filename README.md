@@ -36,15 +36,16 @@ package receipt, and `/usr/local/insel`. It leaves `~/Documents/insel.work`
 
 ## Updating the cask for a new INSEL release
 
-1. Publish the new `.pkg` to insel.eu as usual (`insel_<version>_arm64_full.pkg`).
-2. Compute its checksum:
-   ```
-   curl -sL https://insel.eu/download/insel_<version>_arm64_full.pkg | shasum -a 256
-   ```
-3. In `Casks/insel.rb`, bump `version` and update `sha256` to the new value.
-4. Sanity-check before pushing:
-   ```
-   brew audit --cask insel
-   brew style --cask Casks/insel.rb
-   ```
-5. Commit and push.
+After publishing the new `.pkg` to insel.eu as usual
+(`insel_<version>_arm64_full.pkg`), run:
+
+```
+bin/update-cask
+```
+
+It reads the current version straight from <https://insel.eu/download/>,
+compares it to what's declared in `Casks/insel.rb`, and if they differ,
+downloads the new `.pkg`, computes its sha256, updates `Casks/insel.rb`,
+and commits the change locally. It prints `Already up to date (<version>)`
+and does nothing if there's nothing new. It never pushes — review with
+`git show` and push yourself when ready.
