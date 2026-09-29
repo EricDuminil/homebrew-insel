@@ -8,8 +8,8 @@ cask "insel" do
   homepage "https://insel.eu/"
 
   depends_on arch: :arm64
-  depends_on :macos
   depends_on formula: "gnuplot"
+  depends_on :macos
 
   pkg "insel_#{version}_arm64_full.pkg"
 
